@@ -513,8 +513,14 @@ impl Connection {
         let address = SocketAddr::from_str(&addr)
             .map_err(|e| ConnectionError::SocketAddr(e.to_string()))?;
 
-        let mut stream = TcpStream::connect(&address).await
-            .map(|stream| tokio_util::codec::Framed::new(stream, Codec))?;
+        let connector = tokio_native_tls::TlsConnector::from(native_tls::TlsConnector::new().map_err(|e| ConnectionError::Disconnected)?);
+
+        let mut stream = TcpStream::connect(&address)
+            .await
+            .map(|stream| connector.connect("useast1.gcp.kafkaesque.io", stream))?
+            .await
+            .map(|stream| tokio_util::codec::Framed::new(stream, Codec))
+            .map_err(|e| ConnectionError::Disconnected)?;
 
         let _ = stream
             .send({
