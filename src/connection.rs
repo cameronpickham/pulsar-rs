@@ -517,7 +517,7 @@ impl Connection {
 
         let mut stream = TcpStream::connect(&address)
             .await
-            .map(|stream| connector.connect("useast1.gcp.kafkaesque.io", stream))?
+            .map(|stream| connector.connect("useast2.aws.kafkaesque.io", stream))?
             .await
             .map(|stream| tokio_util::codec::Framed::new(stream, Codec))
             .map_err(|e| ConnectionError::Disconnected)?;
